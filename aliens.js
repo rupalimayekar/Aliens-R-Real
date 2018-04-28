@@ -3,9 +3,8 @@
 /*  Photo by Miriam Espacio on Unsplash */
 /***********************/
   
-var filteredData = dataSet;
-const PAGESIZE = 20;
-const MAXPAGELINKS = 10
+var filteredData = dataSet; // We start with the complete dataset on initial load
+const PAGESIZE = 100;    // The max number of rows to display per page
 
 // Get an array of all the shapes
 const uniqueShapes = [...new Set(dataSet.map(data => data.shape))];
@@ -76,16 +75,45 @@ function renderDataTable(activePage) {
 
     console.log("renderDataTable -> PAGE IS ======  " + activePage);
 
+    var maxPageLinks = 10 // The max number of pagination links to display
     var totalRowCount = filteredData.length;
     
     // calculate the number of pages we will need to display the data
     var totalPageCount = Math.trunc(totalRowCount/PAGESIZE);
+    
     if (totalRowCount%PAGESIZE != 0) {
         totalPageCount ++;
     }
 
     console.log("Total number of data rows == " + totalRowCount);
     console.log("Total number of pages == " + totalPageCount);
+
+    // if there are less than 10 pages, then the maxPageLinks should be the totalPages
+    // this means that we have only one set of pages. This can happen when we filter
+    if (totalPageCount < maxPageLinks) { maxPageLinks = totalPageCount;}
+
+    // calculate the pagination start and end links. Start with 1 to 10
+    var currPagStart = 1;
+    var currPagEnd = maxPageLinks;
+
+    // if the current page is beyond the first 10 pages
+    if (activePage > maxPageLinks) {
+        if (maxPageLinks > 0) {
+            if (activePage%maxPageLinks == 0) {
+                currPagStart = (Math.trunc((activePage-1)/maxPageLinks) * maxPageLinks) + 1;
+            } else {
+                currPagStart = (Math.trunc(activePage/maxPageLinks) * maxPageLinks) + 1;
+            }
+            currPagEnd = currPagStart + maxPageLinks - 1;
+        } else {
+            currPagStart = currPagEnd = 0;
+        }
+        // If this is the last set of pages then set the end to last page
+        if (currPagEnd > totalPageCount) {currPagEnd = totalPageCount;}
+    }
+
+    console.log("current Page Start = " + currPagStart);
+    console.log("current Page End = " + currPagEnd);
 
     var dataColumns = ["Date/Time", "City", "State", "Country", "Shape", "Duration", "Comments"];
 
@@ -96,105 +124,96 @@ function renderDataTable(activePage) {
     // Add a header for the table
     $dataContainer.append("h2").text("UFO Sightings...");
 
-    /*Add the pagination that looks something like below but with different attributes
-    
-    <nav aria-label="Page navigation">
-    <ul class="pagination">
-        <li>
-        <a aria-label="Previous" class="disabled">
-            <span aria-hidden="true">&laquo;</span>
-        </a>
-        </li>
-        <li><a >1</a></li>
-        <li><a >2</a></li>
-        <li><a >3</a></li>
-        <li><a >4</a></li>
-        <li><a >5</a></li>
-        <li>
-        <a aria-label="Next">
-            <span aria-hidden="true">&raquo;</span>
-        </a>
-        </li>
-    </ul>
-    </nav>
-    */
+    // if there are no rows to be displayed then show a msg
+    if (totalRowCount == 0) {
+        $dataContainer.append("div").text("We found no matching results.");
+        $dataContainer.append("br");
+    } else {
 
-    $nav = $dataContainer.append("nav").attr("aria-label", "Results Pages");
-    $navUL = $nav.append("ul").attr("class", "pagination pagination-sm");
-    
-    // Prev <<
-    $li = $navUL.append("li").attr("data_page", "prev");
-    
-    // if we are rendering the first page then disable the prev pagination link
-    if (activePage == 1) { $li.attr("class", "disabled"); }
-    
-    // cont Prev <<
-    $li.append("a").attr("aria-label", "Previous").
-        append("span").attr("aria-hidden", "true").html("&laquo;");
-    
-    // create an li for each page
-    for (var p=1; p<=totalPageCount; p++) {
-        // $li= $navUL.append("li").attr("class", "active").attr("data_page","1").append("a").text("1");
-        // $li= $navUL.append("li").attr("data_page","2").append("a").text("2");
-        $li = $navUL.append("li").attr("data_page", p.toString());
-        $li.append("a").text(p.toString());
-
-        // if this is the page that should be active, then highlight it
-        if (p == activePage) {
-            $li.attr("class", "active");
-        }
-    }
-
-    // Next >>
-    $li= $navUL.append("li").attr("data_page","next");
-    
-    // if we are rendering the last page then disable the prev pagination link
-    if (activePage == totalPageCount) { $li.attr("class", "disabled"); }
-    
-    // cont Next >>
-    $li.append("a").attr("aria-label", "Next").
-        append("span").attr("aria-hidden", "true").html("&raquo;");
+        // Add the pagination
+        $nav = $dataContainer.append("nav").attr("aria-label", "Results Pages");
+        $navUL = $nav.append("ul").attr("class", "pagination pagination-sm");
         
-    
-    // Add a bootstrap table. Display only the rows in the specific page
-    $dataTable = d3.select("#data-container").append("table").attr("id", "data-table"); 
-    $dataTable.attr("class", "table table-bordered table-striped table-responsive");
-    $th = $dataTable.append("thead");
-    $tbody = $dataTable.append("tbody");
-
-    // Add table headers
-    for(var i=0; i<7; i++) {
-        $th.append("th").text(dataColumns[i]);
-    }
-
-    var startRow = PAGESIZE*activePage - PAGESIZE;
-    var endRow = PAGESIZE*activePage;
-
-    // to handle the case when the last page has rows fewer than the pagesize
-    if (activePage == totalPageCount) {
-        endRow = totalRowCount;
-    }
-    
-    console.log("startRow = " + startRow + "  endRow == " + endRow);
-
-    // Add table rows from the filteredData
-    for(var rownum=startRow; rownum<endRow; rownum++){
-        console.log("rownum == " + rownum);
-
-        $tr = $tbody.append("tr");
-
-        $tr.append("td").text(filteredData[rownum].datetime);
-        $tr.append("td").text(filteredData[rownum].city);
-        $tr.append("td").text(filteredData[rownum].state);
-        $tr.append("td").text(filteredData[rownum].country);
-        $tr.append("td").text(filteredData[rownum].shape);
-        $tr.append("td").text(filteredData[rownum].durationMinutes);
-        $tr.append("td").text(filteredData[rownum].comments);
+        // Prev <<
+        $li = $navUL.append("li").attr("data_page", "prev");
+        
+        // if we are rendering the first page then disable the prev pagination link
+        if (activePage == 1) { $li.attr("class", "disabled"); }
+        
+        // cont Prev <<
+        $li.append("a").attr("aria-label", "Previous").
+            append("span").attr("aria-hidden", "true").html("&laquo;");
+        
+        // create an li for each page
+        for (var p=currPagStart; p<=currPagEnd; p++) {
+            $li = $navUL.append("li").attr("data_page", p.toString());
             
+            // if this is the page that should be active, then highlight it
+            if (p == activePage) {
+                $li.attr("class", "active");
+            }
+
+            $li.append("a").text(p.toString());
+
+        }
+
+        // Next >>
+        $li= $navUL.append("li").attr("data_page","next");
+        
+        // if we are rendering the last page then disable the prev pagination link
+        if (activePage == totalPageCount) { $li.attr("class", "disabled"); }
+        
+        // cont Next >>
+        $li.append("a").attr("aria-label", "Next").
+            append("span").attr("aria-hidden", "true").html("&raquo;");
+            
+
+        var startRow = PAGESIZE*activePage - PAGESIZE;
+        var endRow = PAGESIZE*activePage;
+
+        // to handle the case when the last page has rows fewer than the pagesize
+        if (activePage == totalPageCount) {
+            endRow = totalRowCount;
+        }
+        
+        console.log("startRow = " + startRow + "  endRow == " + endRow);
+
+        var displayRow = startRow + 1;
+
+        // display which rows you are showing
+        $dataContainer.append("div").text("Showing results " + displayRow + " to " + endRow + " of " + totalRowCount);
+        $dataContainer.append("br");
+
+        // Add a bootstrap table. Display only the rows in the specific page
+        $dataTable = d3.select("#data-container").append("table").attr("id", "data-table"); 
+        $dataTable.attr("class", "table table-bordered table-striped table-responsive");
+        $th = $dataTable.append("thead");
+        $tbody = $dataTable.append("tbody");
+
+        // Add table headers
+        for(var i=0; i<7; i++) {
+            $th.append("th").text(dataColumns[i]);
+        }
+
+        // Add data rows
+        for(var rownum=startRow; rownum<endRow; rownum++){
+            //console.log("rownum == " + rownum);
+
+            $tr = $tbody.append("tr");
+
+            $tr.append("td").text(filteredData[rownum].datetime);
+            $tr.append("td").text(filteredData[rownum].city);
+            $tr.append("td").text(filteredData[rownum].state);
+            $tr.append("td").text(filteredData[rownum].country);
+            $tr.append("td").text(filteredData[rownum].shape);
+            $tr.append("td").text(filteredData[rownum].durationMinutes);
+            $tr.append("td").text(filteredData[rownum].comments);
+        }
+
+        // set the callback functions on the pagination links
+        setCallbacks();
     }
 
-    // set the callback functions on the pagination links
-    setCallbacks();
 };
 
 /**
