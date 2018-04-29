@@ -19,3 +19,7 @@
 .data-panel {
   background-color: rgb(171, 193, 221);
 }
+
+.shape-filter {
+  width: 200px;
+}

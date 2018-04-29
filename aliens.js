@@ -49,7 +49,7 @@ function renderFilters() {
     $filterPanel.append("br");
 
     // Add the Shapes list filter field
-    var $shapeList = $filterPanel.append("div").attr("class", "form-group");
+    var $shapeList = $filterPanel.append("div").attr("class", "form-group shape-filter");
     $shapeList.append("label").attr("for", "shapeSelect").text("Shape:");
     var shapeSelect = $shapeList.append("select").attr("class", "form-control").attr("id", "shapeSelect");
     
