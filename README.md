@@ -12,8 +12,8 @@ This project uses only HTML, CSS and Javascript with D3.js to implement a page w
 
 ## Sample Page
 
-Take a look at the 
-[resulting html page](index.html)
+Take a look at the resulting html page linked below:
+[https://rupalimayekar.github.io/Aliens-R-Real/](https://rupalimayekar.github.io/Aliens-R-Real/)
 
 ![ScreenShot1](Images/ScreenShot1.png)
 ![ScreenShot2](Images/ScreenShot2.png)
