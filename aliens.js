@@ -1,6 +1,8 @@
-/***********************/
-/* Aliens-R-Real       */
-/***********************/
+/********************************************************************************************/
+/* Aliens-R-Real       
+/* This file contains all the javascript code to display the data table, 
+/* filter data and paginate through the results.
+/********************************************************************************************/
   
 var filteredData = dataSet; // We start with the complete dataset on initial load
 const PAGESIZE = 1000;    // The max number of rows to display per page
