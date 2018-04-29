@@ -18,3 +18,6 @@ Take a look at the resulting html page :
 ![ScreenShot1](Images/ScreenShot1.png)
 ![ScreenShot2](Images/ScreenShot2.png)
 
+## References
+Alien Image credits : Photo by Miriam Espacio on [Unsplash.com](https://unsplash.com/)
+

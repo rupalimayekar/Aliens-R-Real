@@ -1,6 +1,5 @@
 /***********************/
 /* Aliens-R-Real       */
-/*  Photo by Miriam Espacio on Unsplash */
 /***********************/
   
 var filteredData = dataSet; // We start with the complete dataset on initial load
@@ -210,7 +209,7 @@ function renderDataTable(activePage) {
 
         // cont Last >>
         $li.append("a").attr("aria-label", "Last").
-        append("span").attr("aria-hidden", "true").html('<i class="fa fa-forward" aria-hidden="true"></i>');
+        append("span").attr("aria-hidden", "true").html('<i class="fa fa-fast-forward" aria-hidden="true"></i>');
             
 
 
