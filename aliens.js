@@ -60,10 +60,19 @@ function renderFilters() {
 
     // Add the filter button
     $filterBtn = $filterPanel.append("buton").text("Filter");
-    $filterBtn.attr("class", "btn, btn-primary btn-lg");
+    $filterBtn.attr("class", "btn btn-primary btn-lg");
     $filterBtn.attr("type", "submit");
     $filterBtn.attr("id", "filterButton");
     $filterBtn.on("click", filterData);
+
+    $filterPanel.append("span").html("&nbsp;&nbsp;&nbsp;&nbsp;");
+
+    // Add the reset button
+    $resetBtn = $filterPanel.append("buton").text("Reset");
+    $resetBtn.attr("class", "btn btn-primary btn-lg");
+    $resetBtn.attr("type", "submit");
+    $resetBtn.attr("id", "resetButton");
+    $resetBtn.on("click", resetFilters);
 
     $filterPanel.append("br");
     $filterPanel.append("br");
@@ -323,6 +332,23 @@ function filterData() {
 
   renderDataTable(1);
 };
+
+/**
+ * This function is the event handler for the Reset button on the filter panel. It clears all the
+ * filter fields.
+ */
+function resetFilters() {
+    // stop the default submit behavior
+    d3.event.preventDefault();
+
+    // clear all input fields
+    d3.select("#startDateInput").node().value = "";
+    d3.select("#cityInput").node().value = "";
+    d3.select("#endDateInput").node().value = "";
+    d3.select("#stateInput").node().value = "";
+    d3.select("#countryInput").node().value = "";
+    d3.select("#shapeSelect").node().value = "";
+}
 
 /**
  * This function sets the callback functions for all the clickable pagination elements
