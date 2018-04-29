@@ -4,7 +4,7 @@
 /***********************/
   
 var filteredData = dataSet; // We start with the complete dataset on initial load
-const PAGESIZE = 100;    // The max number of rows to display per page
+const PAGESIZE = 1000;    // The max number of rows to display per page
 
 // Get an array of all the shapes
 const uniqueShapes = [...new Set(dataSet.map(data => data.shape))];
@@ -22,6 +22,7 @@ function renderFilters() {
     
     // Add the heading for filters
     $filterPanel.append("h3").text("Filter UFO sightings:");
+    $filterPanel.append("br");
     
     // Add the date input fields
     $filterPanel.append("label").attr("for", "startDateInput").html("Start Date:&nbsp;");
@@ -55,6 +56,7 @@ function renderFilters() {
     // Add values into the list for selection
     shapeSelect.append("option").text("All");
     uniqueShapes.forEach(shape => shapeSelect.append("option").text(shape));
+    $filterPanel.append("br");
 
     // Add the filter button
     $filterBtn = $filterPanel.append("buton").text("Filter");
@@ -64,18 +66,14 @@ function renderFilters() {
     $filterBtn.on("click", filterData);
 
     $filterPanel.append("br");
+    $filterPanel.append("br");
 };
 
 /**
- * This function renders the UFO Sightings data table on initial load and every time the filter
- * button is clicked. The contents of the table are in the filteredData variable. The filteredData
- * is initially set to the complete dataSet array of the data.js file.
+ * This function calculates the total number of pages that the data is broken into for pagination
+ * It returns the number of pages and number of rows in an object.
  */
-function renderDataTable(activePage) {
-
-    console.log("renderDataTable -> PAGE IS ======  " + activePage);
-
-    var maxPageLinks = 10 // The max number of pagination links to display
+function getRowPageCounts() {
     var totalRowCount = filteredData.length;
     
     // calculate the number of pages we will need to display the data
@@ -87,6 +85,24 @@ function renderDataTable(activePage) {
 
     console.log("Total number of data rows == " + totalRowCount);
     console.log("Total number of pages == " + totalPageCount);
+
+    return {"rowCount": totalRowCount, "pageCount": totalPageCount};
+}
+
+/**
+ * This function renders the UFO Sightings data table on initial load and every time the filter
+ * button is clicked. The contents of the table are in the filteredData variable. The filteredData
+ * is initially set to the complete dataSet array of the data.js file.
+ */
+function renderDataTable(activePage) {
+
+    console.log("renderDataTable -> PAGE IS ======  " + activePage);
+
+    var maxPageLinks = 10 // The max number of pagination links to display
+    
+    var counts = getRowPageCounts();
+    totalRowCount = counts.rowCount;
+    totalPageCount = counts.pageCount;
 
     // if there are less than 10 pages, then the maxPageLinks should be the totalPages
     // this means that we have only one set of pages. This can happen when we filter
@@ -122,7 +138,7 @@ function renderDataTable(activePage) {
     $dataContainer.html("");
 
     // Add a header for the table
-    $dataContainer.append("h2").text("UFO Sightings...");
+    $dataContainer.append("h3").text("UFO Sightings...");
 
     // if there are no rows to be displayed then show a msg
     if (totalRowCount == 0) {
@@ -134,15 +150,25 @@ function renderDataTable(activePage) {
         $nav = $dataContainer.append("nav").attr("aria-label", "Results Pages");
         $navUL = $nav.append("ul").attr("class", "pagination pagination-sm");
         
-        // Prev <<
+        // First <<
+        $li = $navUL.append("li").attr("data_page", "first");
+        
+        // if we are rendering the first page then disable the prev pagination link
+        if (activePage == 1) { $li.attr("class", "disabled"); }
+        
+        // cont First <<
+        $li.append("a").attr("aria-label", "First").
+            append("span").attr("aria-hidden", "true").html('<i class="fa fa-fast-backward" aria-hidden="true"></i>');
+        
+        // Prev <
         $li = $navUL.append("li").attr("data_page", "prev");
         
         // if we are rendering the first page then disable the prev pagination link
         if (activePage == 1) { $li.attr("class", "disabled"); }
         
-        // cont Prev <<
+        // cont Prev <
         $li.append("a").attr("aria-label", "Previous").
-            append("span").attr("aria-hidden", "true").html("&laquo;");
+            append("span").attr("aria-hidden", "true").html('<i class="fa fa-caret-left" aria-hidden="true"></i>');
         
         // create an li for each page
         for (var p=currPagStart; p<=currPagEnd; p++) {
@@ -157,16 +183,27 @@ function renderDataTable(activePage) {
 
         }
 
-        // Next >>
+        // Next >
         $li= $navUL.append("li").attr("data_page","next");
         
-        // if we are rendering the last page then disable the prev pagination link
+        // if we are rendering the last page then disable the next pagination link
         if (activePage == totalPageCount) { $li.attr("class", "disabled"); }
         
-        // cont Next >>
+        // cont Next >
         $li.append("a").attr("aria-label", "Next").
-            append("span").attr("aria-hidden", "true").html("&raquo;");
+            append("span").attr("aria-hidden", "true").html('<i class="fa fa-caret-right" aria-hidden="true"></i>');
+
+        // Last >>
+        $li= $navUL.append("li").attr("data_page","last");
+
+        // if we are rendering the last page then disable the next pagination link
+        if (activePage == totalPageCount) { $li.attr("class", "disabled"); }
+
+        // cont Last >>
+        $li.append("a").attr("aria-label", "Last").
+        append("span").attr("aria-hidden", "true").html('<i class="fa fa-forward" aria-hidden="true"></i>');
             
+
 
         var startRow = PAGESIZE*activePage - PAGESIZE;
         var endRow = PAGESIZE*activePage;
@@ -187,13 +224,14 @@ function renderDataTable(activePage) {
         // Add a bootstrap table. Display only the rows in the specific page
         $dataTable = d3.select("#data-container").append("table").attr("id", "data-table"); 
         $dataTable.attr("class", "table table-bordered table-striped table-responsive");
-        $th = $dataTable.append("thead");
-        $tbody = $dataTable.append("tbody");
-
+        $tr = $dataTable.append("thead").append("tr");
+        
         // Add table headers
         for(var i=0; i<7; i++) {
-            $th.append("th").text(dataColumns[i]);
+            $tr.append("th").text(dataColumns[i]);
         }
+
+        $tbody = $dataTable.append("tbody");
 
         // Add data rows
         for(var rownum=startRow; rownum<endRow; rownum++){
@@ -322,6 +360,24 @@ function setCallbacks() {
                 // get the active li to get the current page number
                 curr_page = d3.select(".pagination").select(".active").attr("data_page");
                 renderDataTable(parseInt(curr_page)+1);
+            }
+        } else if (page == "first") {
+            if (li_class == "disabled") {
+                // do not do anythng
+                console.log("Ignoring disabled next page click")
+            } else {
+                // handle click here to go to the first page           
+                renderDataTable(1);
+            }
+        } else if (page == "last") {
+            if (li_class == "disabled") {
+                // do not do anythng
+                console.log("Ignoring disabled next page click")
+            } else {
+                // handle click here to go to the last page           
+                var counts = getRowPageCounts();
+                totalPageCount = counts.pageCount;
+                renderDataTable(totalPageCount);
             }
         } else {
             // handle a specific page number click

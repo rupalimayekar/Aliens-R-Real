@@ -1,4 +1,21 @@
+
+.header-panel{
+  margin-left: 40px;
+
+}
 .header_image {
     background-image: url('Images/aliens_driving_cropped.png');
     height: 300px;
   }
+
+.alien-text {
+  font-size: 120%;
+}
+
+.filter-panel {
+  background-color: rgb(247, 222, 156);
+}
+
+.data-panel {
+  background-color: rgb(171, 193, 221);
+}
